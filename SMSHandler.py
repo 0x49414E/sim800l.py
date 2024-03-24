@@ -1,5 +1,4 @@
-import serial, configparser,re
-from pwn import log
+import serial, configparser,re, logging
 from time import sleep
 
 CREG_PATTERN = r"\+CREG:\s*(\d+),(\d+)";
@@ -13,9 +12,10 @@ class SMSHandler:
         self.port = str(self.config['SIM800L']['SerialPort']);
         self.baudrate = int(self.config['SIM800L']['BaudRate']);
         self.ser = serial.Serial(self.port, self.baudrate, timeout=10);
-        self.p1 = log.progress("SMS Handler");
+        self.logger = logging.getLogger(__name__);
         self.data = "";
         self.run_count = 0;
+        self.sending = 0;
     
     def read_config(self, config_file):
         config = configparser.ConfigParser();
@@ -34,12 +34,29 @@ class SMSHandler:
             if self.ser.in_waiting > 0:
                 res = self.ser.read(self.ser.in_waiting);
                 if(filter.encode() in res):
-                    self.p1.status(res.decode());
-                    self.data = res.decode();
+                    self.data = re.sub(r'^>.*$', '', res.decode(), flags=re.MULTILINE);
+                    if(self.sending == 0):
+                        self.logger.info(f"\r[+] Command {cmd} sent! Received response:\n>> " + self.data);
+                    elif(self.sending == 1):
+                        self.logger.info(f"\r[+] Sending SMS to {self.phone}!\n");
                     return;
 
+    def check_status(self):
+        self.send_cmd("AT", "OK");
+        self.send_cmd("AT+CFUN=0");
+        self.send_cmd("AT+CFUN=1", "SMS Ready");
+        self.send_cmd("AT+CMGF=1");
+        self.send_cmd("AT+CREG?", "0,1");
+        
+    def log_status(self):
+        logging.basicConfig(filename='./logs/module_status.log', encoding='utf-8', level=logging.DEBUG, filemode='w', format='%(asctime)s %(message)s');
+        self.logger.info("\r[!] Logging status info!\r");
+        self.check_status();
+
     def send_sms(self):
+        self.sending = 1;
         self.send_cmd(f"AT+CMGS=\"{self.phone}\"");
+        self.sending = 2;
         self.send_cmd(self.message);
         self.write_ctrlz();
 
@@ -51,27 +68,25 @@ class SMSHandler:
 
     def run(self):
         try:
-            self.send_cmd("AT", "OK");
-            self.send_cmd("AT+CFUN=0");
-            self.send_cmd("AT+CFUN=1", "SMS Ready");
-            self.send_cmd("AT+CMGF=1");
-            self.send_cmd("AT+CREG?", "0,1");
+            logging.basicConfig(filename='./logs/handler.log', encoding='utf-8', level=logging.DEBUG, filemode='w', format='%(asctime)s %(message)s')
+            self.logger.info("\r[!] Logging SMS handler events!\r");
+            self.check_status();
 
             creg_match = re.search(CREG_PATTERN, self.data);
 
             if creg_match:
                 if(creg_match.group(2) == "1"):
                     pass;
-                elif(creg_match.group(2) == "2"):
-                    self.p1.status("[!] Error occurred...\n[!] AT+CREG responded with 0,2...");
+                else:
+                    self.logger.error(f"[!] Error occurred...\n[!] AT+CREG responded with 0,{creg_match.group(2)}...");
                     self.run_count += 1;
                     if self.run_count >= 5:
-                        raise Exception("Can't connect to GPRS network!");
+                        raise Exception("AT+CREG?: Can't connect to GPRS network!");
                     self.run();
 
             self.send_sms();
         
         except Exception as e:
-            self.p1.status(str(e)); 
+            self.logger.error(str(e)); 
             return;
 
