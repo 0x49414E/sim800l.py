@@ -1,0 +1,25 @@
+2024-03-30 18:12:49,353 [!] Logging SMS handler events!
+2024-03-30 18:12:49,455 [+] Command AT sent! Received response:
+>> AT
+OK
+
+2024-03-30 18:12:49,557 [+] Command AT+CFUN=0 sent! Received response:
+>> AT+CFUN=0
+2024-03-30 18:12:58,008 [+] Command AT+CFUN=1 sent! Received response:
+>> AT+CFUN=1
+OK
+
+SMS Ready
+
+2024-03-30 18:12:58,109 [+] Command AT+CMGF=1 sent! Received response:
+>> AT+CMGF=1
+OK
+
+2024-03-30 18:13:01,937 [+] Command AT+CREG? sent! Received response:
+>> AT+CREG?
++CREG: 0,1
+
+OK
+
+2024-03-30 18:13:02,039 [+] Sending SMS to +541112345678!
+

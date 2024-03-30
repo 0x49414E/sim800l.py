@@ -1,5 +1,5 @@
-import serial, configparser,re, logging
 from time import sleep
+import serial, configparser,re, logging
 
 CREG_PATTERN = r"\+CREG:\s*(\d+),(\d+)";
 
