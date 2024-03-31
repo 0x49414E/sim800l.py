@@ -1,6 +1,6 @@
 from SMSHandler import SMSHandler
 from PIDHandler import PIDHandler
-import sys,signal,subprocess,configparser
+import sys,signal,subprocess
 
 def CTRL_C(sig, frame):
     print("[!] Exiting...");
