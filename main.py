@@ -1,6 +1,6 @@
 from SMSHandler import SMSHandler
 from PIDHandler import PIDHandler
-import sys,signal,subprocess
+import sys,signal,logging
 
 def CTRL_C(sig, frame):
     print("[!] Exiting...");
@@ -14,11 +14,17 @@ p.terminate();
 
 def main():
     global h;
-    h = SMSHandler("config/config.ini", "payload.ini");
-    h.run();
-    h.close();
-
-    subprocess.Popen(["python", "status/check_status.py"], creationflags=subprocess.CREATE_NO_WINDOW, shell=True);
+    try:
+        h = SMSHandler("config/config.ini", "payload.ini");
+        h.run();
+        h.close();
+        with open("./logs/ok.log", mode="w") as f:
+            f.write("OK");
+    except Exception as e:
+        logger = logging.getLogger(__name__);
+        with open("./logs/error.log", mode="w") as f:
+            logging.basicConfig(filename='./logs/error.log', encoding='utf-8', level=logging.DEBUG, filemode='w', format='%(asctime)s %(message)s');
+            logger.error(str(e));
 
 if __name__ == '__main__':
     main();

@@ -1,5 +1,5 @@
 from time import sleep
-import sys, os, signal, configparser
+import sys, os, signal,logging
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')));
 from PIDHandler import PIDHandler
@@ -22,22 +22,21 @@ p.new();
 
 
 def log():
-    while True:
-        config = configparser.ConfigParser();
-        config.read("config/config.ini");
-        terminate = config['INIT']['terminate'];
-        with open("logs/module_status.log", "r+") as w:
-            if(int(terminate) == 1):
-                p.terminate();
-                break;
-            elif(int(terminate) == 0):
-                pass;
-            w.seek(0);
-            w.truncate();
-        sleep(10);
+    with open("logs/module_status.log", "r+") as w:
+        w.seek(0);
+        w.truncate();
+    sleep(10);
+    try:
         h = SMSHandler("config/config.ini", "payload.ini");
         h.log_status();
         h.close();
+        with open("./logs/ok.log", mode="w") as f:
+            f.write("OK");
+    except Exception as e:
+        logger = logging.getLogger(__name__);
+        with open("./logs/error.log", mode="w") as f:
+            logging.basicConfig(filename='./logs/error.log', encoding='utf-8', level=logging.DEBUG, filemode='w', format='%(asctime)s %(message)s');
+            logger.error(str(e));
 
 if __name__ == "__main__":
     log()
