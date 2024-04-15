@@ -1,0 +1,1 @@
+2024-04-08 11:45:58,785 could not open port 'COM3': FileNotFoundError(2, 'El sistema no puede encontrar el archivo especificado.', None, 2)

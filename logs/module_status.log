@@ -1,0 +1,23 @@
+2024-04-08 11:51:35,265 [!] Logging status info!
+2024-04-08 11:51:35,366 [+] Command AT sent! Received response:
+>> AT
+OK
+
+2024-04-08 11:51:35,467 [+] Command AT+CFUN=0 sent! Received response:
+>> AT+CFUN=0
+2024-04-08 11:51:43,923 [+] Command AT+CFUN=1 sent! Received response:
+>> AT+CFUN=1
+OK
+
+SMS Ready
+
+2024-04-08 11:51:44,024 [+] Command AT+CMGF=1 sent! Received response:
+>> AT+CMGF=1
+OK
+
+2024-04-08 11:51:48,291 [+] Command AT+CREG? sent! Received response:
+>> AT+CREG?
++CREG: 0,1
+
+OK
+
